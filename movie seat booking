@@ -1,0 +1,354 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define ROWS 15
+#define COLS 10
+
+int seat_type, num;
+int selection,choice;
+int seatsAvailable = 120;
+char seats[ROWS][COLS];
+char bookedSeats[ROWS][COLS] = {'\0'};
+int row,col,row1[10],col1[10]; //  to store booked seats
+
+typedef struct {
+    char showname[20];
+    char date[12];
+    char time[6];
+    char gate[2];
+} Show;
+Show show = {"Avengers: Endgame", "20-1-2024", "2:30", "7"};
+
+struct User {
+    char name[50];
+    char phno[10];
+    int age;
+} U[150];
+
+// Function declarations
+void movie_details();
+void movie_display_select();
+void seatdisp();
+void amount();
+void user_details();
+void displaymenu();
+void looping();
+void bookSeat(char seats[][COLS], char bookedSeats[][COLS], int row, int col);
+void displaySeatingArrangement(char seats[][COLS], char bookedSeats[][COLS]);
+void seat_book();
+void cancel( char seats[][COLS],char bookedSeats[][COLS], int row, int col);
+void cancelBooking(char bookedSeats[][COLS], int row, int col);
+
+int main() {
+    
+    int i,j;
+    for ( i = 0; i < ROWS; ++i) {
+        for (j = 0; j < COLS; ++j) {
+            seats[i][j] = 'O';
+            bookedSeats[i][j] = '\0';
+        }
+    }
+
+    displaymenu();
+    while (selection != 4) {
+        looping();
+    }
+    return 0;
+}
+
+
+void displaymenu() {
+    printf("\n");
+    printf("\t  THEATRE SEAT RESERVATION\n"
+           "\t=============================\n"
+           "\tNow Showing: Avengers:Endgame\n"
+           "\t=============================\n"
+           "\n\t1=> FOR MOVIE DETAILS\n"
+           "\n\t2=> FOR SEAT DISPLAY\n"
+           "\n\t3=> FOR SEAT BOOKING\n"
+           "\n\t4=> EXIT\n\n");
+    printf("\t=============================\n");
+    printf("\tPlease Enter Any : ");
+    scanf("%d", &selection);
+    looping();
+}
+
+void looping() {
+    switch (selection) {
+        case 1:
+            movie_details();
+            break;
+        case 2:
+            displaySeatingArrangement(seats,bookedSeats);
+            break;
+        case 3:
+            movie_display_select();
+            seat_book();
+            amount();
+            if (choice==1)
+            { 
+			   user_details();
+		    }
+             break;
+        case 4:
+            exit(1);
+            break;
+        default:
+            printf("\tInvalid selection. Try again\n");
+    }
+}
+
+void movie_details() {
+    printf("\n\t\t---Movies Streaming---\n");
+    printf("\n\t\t1.%s  --timing %s\n\n", show.showname, show.time);
+    main();
+}
+
+void movie_display_select() {
+    int i, m_select;
+    printf("\n\n\t\t---Movies Streaming---\n");
+    printf("\n\t\tcode 1.%s  --timing %s", show.showname, show.time);
+    printf("\n\n\t\tEnter the code of the movie you want to watch:");
+    scanf("%d", &m_select);
+    if(m_select==1)
+    {
+    }else
+	{
+	 printf("\n\t\tEnter the correct code of the movie you want to watch:");
+     scanf("%d", &m_select);
+	}
+}
+
+
+void seat_book() {
+    int i;
+    seatdisp();
+    printf("\n\t\tEnter the number of seats you want to book:");
+    scanf("%d", &num);
+
+    for (i = 0; i < num; i++) {
+        displaySeatingArrangement(seats, bookedSeats);
+        printf("\n\t\tEnter row and column to book a seat (e.g., 1 2): ");
+        scanf("%d %d", &row, &col);
+        row1[i]=row;
+        col1[i]=col;
+
+        if (row >= 1 && row <= ROWS && col >= 1 && col <= COLS) {
+            bookSeat(seats, bookedSeats, row - 1, col - 1);
+            displaySeatingArrangement(seats, bookedSeats);
+        } else {
+            printf("\nInvalid row or column. Please try again.\n");
+        }
+    }
+}
+
+
+void seatdisp() {
+    printf("\n\t\t1. Rectilinear --price:450\n");
+    printf("\t\t2. Super Deluxe --price:400\n");
+    printf("\t\t3. Deluxe --price:350\n");
+    printf("\t\tEnter seat type (1-Rectilinear, 2-Super Deluxe, 3-Deluxe): ");
+    scanf("%d", &seat_type);
+
+    if ((seat_type != 1) && (seat_type != 2) && (seat_type != 3)) {
+        printf("\t\tEnter valid seat type (1-Rectilinear, 2-Super Deluxe, 3-Deluxe):");
+        scanf("%d", &seat_type);
+    }
+}
+
+void displaySeatingArrangement(char seats[][COLS], char bookedSeats[][COLS]) {
+    printf("\nSeating Arrangement:\n\n");
+    printf("   ");
+    int i, j;
+
+    for (i = 1; i <= COLS; ++i) {
+        printf("%2d ", i);
+    }
+    printf("\n");
+
+    for (i = 0; i < ROWS; ++i) {
+        printf("%2d ", i + 1);
+        for (j = 0; j < COLS; ++j) {
+            if (bookedSeats[i][j] == 'X') {
+                printf("%2c ", 'X');
+            } else if(choice==1)
+            {
+            	printf("%2c ", '0');
+			}
+			else {
+                printf("%2c ", seats[i][j]);
+            }
+        }
+
+        if (i == 0 || i == 1) {
+            printf(" --Rectilinear\n");
+        } else if (i == 2 || i == 3 || i == 4 || i == 5) {
+            printf(" --Super Deluxe\n");
+        } else {
+            printf(" --Deluxe\n");
+            if (selection == 2) {
+                printf("\n\n");
+                main();
+            }
+        }
+    }
+}
+
+void bookSeat(char seats[][COLS], char bookedSeats[][COLS], int row, int col) {
+    if (bookedSeats[row][col] == 'X') {
+        printf("\nSeat already booked. Please choose another seat.\n");
+    } else if ((seat_type == 1) && (row == 0 || row == 1)) 
+	{
+        bookedSeats[row][col] = 'X';
+        printf("\nSeat booked successfully!\n");
+    } else if ((seat_type == 2) && (row == 2 || row == 3 || row == 4)) 
+	{
+        bookedSeats[row][col] = 'X';
+        printf("\nSeat booked successfully!\n");
+    } else if ((seat_type == 3) && (row > 4 && row < ROWS)) 
+	{
+        bookedSeats[row][col] = 'X';
+        printf("\nSeat booked successfully!\n");
+    } else 
+	{
+		cancelBooking(bookedSeats,row-1, col-1);
+        cancel(seats, bookedSeats, row-1, col-1);
+        printf("\nThe seat type and seat number did not match\n");
+        printf("\nEnter correct seat type and seat number\n");
+        seat_book();
+    }
+    
+}
+
+
+void amount() {
+    int opi;
+    if (seat_type == 1) 
+	{
+        printf("\nTotal amount to be paid : %d ", num * 450);
+        printf("\nEnter 1 to confirm booking and make payment otherwise Enter 0 to exit:");
+        scanf("%d", &choice);
+		 if (choice == 1) 
+		 {
+            user_details();
+         } 
+		 else 
+		 {
+		 	cancelBooking(bookedSeats,row-1, col-1);
+            cancel(seats, bookedSeats, row-1, col-1);
+            printf("Enter 1 to start the process again 0 to exit from booking:");
+            scanf("%d", &opi);
+            if (opi == 1) 
+			{
+                movie_display_select();
+            } 
+			else 
+			{
+                displaymenu();
+            }
+         }
+        
+    } else if (seat_type == 2) {
+        printf("\nTotal amount to be paid: %d ", num * 400);
+        printf("\nEnter 1 to confirm booking and make payment otherwise Enter 0 to exit:");
+        scanf("%d", &choice);
+
+        if (choice == 1) {
+            user_details();
+        } else 
+		{
+			cancelBooking(bookedSeats,row-1, col-1);
+            cancel(seats, bookedSeats, row-1, col-1);
+            printf("Enter 1 to start the process again 0 to exit from booking:");
+            scanf("%d", &opi);
+            if (opi == 1) {
+                movie_display_select();
+            } else {
+                displaymenu();
+            }
+        }
+    } else {
+        printf("\nTotal amount to be paid: %d ", num * 350);
+        printf("\nEnter 1 to confirm booking and make payment otherwise Enter 0 to exit:");
+        scanf("%d", &choice);
+
+        if (choice == 1) {
+            user_details();
+        } else {
+        	cancelBooking(bookedSeats,row-1, col-1);
+            cancel(seats, bookedSeats, row-1, col-1);
+            printf("Enter 1 to start the process again 0 to exit from booking:");
+            scanf("%d", &opi);
+            if (opi == 1) {
+                movie_display_select();
+            } else {
+                displaymenu();
+            }
+        }
+    }
+}
+
+void cancelBooking(char bookedSeats[][COLS], int row, int col) {
+    bookedSeats[row][col] = '0';
+    int i;
+    for (i = 0; i < 10; i++) {
+        bookedSeats[row1[i]-1][col1[i]-1] = '0';
+    }
+}
+
+void cancel(char seats[][COLS], char bookedSeats[][COLS], int row, int col) {
+    // Check if the seat is booked
+    if (bookedSeats[row][col] == 'X') {
+        // Store the original state before making it available again
+        seats[row][col] = 'O';
+        int i;
+        bookedSeats[row][col] = '\0';
+        for (i = 0; i < 10; i++) {
+            seats[row1[i]-1][col1[i]-1] = 'O';
+            bookedSeats[row1[i]-1][col1[i]-1] = '\0';
+        }
+        printf("\nSeat canceled successfully!\n");
+    }
+}
+
+
+
+void user_details() {
+    int i;
+    printf("\n\tEnter details of viewer :\n",i+1);
+    printf("\n\tName: ");
+    scanf("%s", U[0].name);
+    printf("\n\tPhone number: ");
+    scanf("%s", U[0].phno);
+    printf("\n\tAge: ");
+    scanf("%d", &U[0].age);
+    
+    
+    printf("\n\n\n\t\t--------------------------------------------------------------------\n");
+    printf("\n\t\t--------------------------MOVIE TICKET------------------------------\n");
+    printf("\n\t\t\tTicket\n");
+    printf("\n\t\t\tName: %s\n", U[0].name);
+    printf("\n\t\t\tPhone number: %s\n", U[0].phno);
+    printf("\n\t\t\tAge: %d\n", U[0].age);
+    printf("\n\t\t\tMovie: %s\n", show.showname);
+    printf("\n\t\t\tDate: %s\n", show.date);
+    printf("\n\t\t\tTime: %s\n", show.time);
+    printf("\n\t\t\tSeat type: %d\n", seat_type);
+    printf("\n\t\t\tNumber of seats booked: %d\n", num);
+    printf("\n\t\t\tTotal amount paid: ");
+
+    if (seat_type == 1) {
+        printf("%d\n", num * 450);
+    } else if (seat_type == 2) {
+        printf("%d\n", num * 400);
+    } else {
+        printf("%d\n", num * 350);
+    }
+    printf("\n\tPayment option: ");
+    printf("UPI\n");
+    printf("\n--------------------------------------------------------------------\n");
+    printf("\n\tTicket booked successfully! Enjoy the movie.\n");
+    printf("\n--------------------------------------------------------------------\n\n");
+    displaymenu();
+}
