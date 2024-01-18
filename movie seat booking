@@ -2,15 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ROWS 15
-#define COLS 10
-
+int ROWS = 15;
+int COLS = 10;
 int seat_type, num;
 int selection,choice;
 int seatsAvailable = 120;
-char seats[ROWS][COLS];
-char bookedSeats[ROWS][COLS] = {'\0'};
+int rectilinearPrice= 450;
+int superDeluxePrice= 400;
+int deluxePrice=350;
+char seats[15][10];
+char bookedSeats[15][10] = {'\0'};
 int row,col,row1[10],col1[10]; //  to store booked seats
+
 
 typedef struct {
     char showname[20];
@@ -26,6 +29,8 @@ struct User {
     int age;
 } U[150];
 
+
+
 // Function declarations
 void movie_details();
 void movie_display_select();
@@ -40,8 +45,10 @@ void seat_book();
 void cancel( char seats[][COLS],char bookedSeats[][COLS], int row, int col);
 void cancelBooking(char bookedSeats[][COLS], int row, int col);
 
+// Function declaration for admin functionality
+void adminMenu();
+
 int main() {
-    
     int i,j;
     for ( i = 0; i < ROWS; ++i) {
         for (j = 0; j < COLS; ++j) {
@@ -51,23 +58,24 @@ int main() {
     }
 
     displaymenu();
-    while (selection != 4) {
+    while (selection != 5) {
         looping();
     }
+
     return 0;
 }
 
-
 void displaymenu() {
     printf("\n");
-    printf("\t  THEATRE SEAT RESERVATION\n"
+    printf("\t\t MOVIE SEAT BOOKING\n"
            "\t=============================\n"
            "\tNow Showing: Avengers:Endgame\n"
            "\t=============================\n"
            "\n\t1=> FOR MOVIE DETAILS\n"
            "\n\t2=> FOR SEAT DISPLAY\n"
            "\n\t3=> FOR SEAT BOOKING\n"
-           "\n\t4=> EXIT\n\n");
+           "\n\t4=> ADMIN MENU\n"
+           "\n\t5=> EXIT\n\n");
     printf("\t=============================\n");
     printf("\tPlease Enter Any : ");
     scanf("%d", &selection);
@@ -80,24 +88,113 @@ void looping() {
             movie_details();
             break;
         case 2:
-            displaySeatingArrangement(seats,bookedSeats);
+            displaySeatingArrangement(seats, bookedSeats);
             break;
         case 3:
             movie_display_select();
             seat_book();
             amount();
-            if (choice==1)
-            { 
-			   user_details();
-		    }
-             break;
+            if (choice == 1) {
+                user_details();
+            }
+            break;
         case 4:
+            adminMenu();  // Call the admin functionality
+            break;
+        case 5:
             exit(1);
             break;
         default:
             printf("\tInvalid selection. Try again\n");
     }
 }
+
+// New admin function to handle all administrative functionalities
+void adminMenu() {
+    int adminChoice,result,pin,pin1;
+    pin=5000;
+    printf("\nEnter the admin code:");
+    scanf("%d",&pin1);
+    if(pin1==pin)
+    {      
+	     printf("\n\tADMIN MENU\n"
+           "\t=============================\n"
+           "\t1=> Update Number of Seats\n"
+           "\t2=> Update Show Details\n"
+           "\t3=> Update Seat Types and Prices\n"
+           "\t4=> Exit Admin Menu\n"
+           "\t=============================\n");
+          printf("\tPlease Enter Your Choice: ");
+          scanf("%d", &adminChoice);
+
+    switch (adminChoice) {
+        case 1:
+            printf("\nEnter the new number of seats: ");
+            scanf("%d", &seatsAvailable);
+            printf("\nEnter the new number of rows: ");
+            scanf("%d", &ROWS);
+            printf("\nEnter the new number of columns: ");
+            scanf("%d", &COLS);
+            displaymenu();
+            break;
+        case 2:
+        	cancelBooking(bookedSeats,row-1, col-1);
+            cancel(seats, bookedSeats, row-1, col-1);
+            printf("\n\tEnter the new show name: ");
+            scanf("%s", show.showname);
+            printf("\n\tEnter the new show date: ");
+            scanf("%s", show.date);
+            printf("\n\tEnter the new show time: ");
+            scanf("%s", show.time);
+            printf("\n\tEnter the new gate number: ");
+            scanf("%s", show.gate);
+            displaymenu();
+            break;
+        case 3:
+            printf("\n\tUpdate Seat Prices\n");
+          printf("\n\t1=> Rectilinear -- Current Price: %d\n",rectilinearPrice);
+          printf("\n\t2=> Super Deluxe -- Current Price: %d\n",superDeluxePrice);
+          printf("\n\t3=> Deluxe -- Current Price: %d\n",deluxePrice);
+          printf("\n\tPlease Enter Seat Type to Update Price: ");
+
+         int seatType;
+         scanf("%d", &seatType);
+
+         switch (seatType) 
+		 {
+            case 1:
+               printf("\n\tEnter new price for Rectilinear: ");
+               scanf("%d", &rectilinearPrice);
+               break;
+           case 2:
+               printf("\n\tEnter new price for Super Deluxe: ");
+               scanf("%d", &superDeluxePrice);
+               break;
+           case 3:
+                printf("\n\tEnter new price for Deluxe: ");
+                scanf("%d", &deluxePrice);
+               break;
+            default:
+              printf("\n\tInvalid seat type. Try again.\n");
+         }
+         displaymenu();
+            break;
+        case 4:
+            printf("\tExiting Admin Menu.\n");
+            displaymenu();
+            break;
+        default:
+            printf("\tInvalid choice. Returning to Admin Menu.\n");
+            displaymenu();
+    }
+}
+else
+{
+	printf("\tInvalid Code.\n");
+	displaymenu();
+}
+}
+
 
 void movie_details() {
     printf("\n\t\t---Movies Streaming---\n");
@@ -139,15 +236,16 @@ void seat_book() {
             displaySeatingArrangement(seats, bookedSeats);
         } else {
             printf("\nInvalid row or column. Please try again.\n");
+            displaymenu();
         }
     }
 }
 
 
 void seatdisp() {
-    printf("\n\t\t1. Rectilinear --price:450\n");
-    printf("\t\t2. Super Deluxe --price:400\n");
-    printf("\t\t3. Deluxe --price:350\n");
+    printf("\n\t\t1. Rectilinear --price:%d\n",rectilinearPrice);
+    printf("\t\t2. Super Deluxe --price:%d\n",superDeluxePrice);
+    printf("\t\t3. Deluxe --price:%d\n",deluxePrice);
     printf("\t\tEnter seat type (1-Rectilinear, 2-Super Deluxe, 3-Deluxe): ");
     scanf("%d", &seat_type);
 
@@ -161,12 +259,9 @@ void displaySeatingArrangement(char seats[][COLS], char bookedSeats[][COLS]) {
     printf("\nSeating Arrangement:\n\n");
     printf("   ");
     int i, j;
-
     for (i = 1; i <= COLS; ++i) {
-        printf("%2d ", i);
-    }
+        printf("%2d ", i);}
     printf("\n");
-
     for (i = 0; i < ROWS; ++i) {
         printf("%2d ", i + 1);
         for (j = 0; j < COLS; ++j) {
@@ -175,12 +270,10 @@ void displaySeatingArrangement(char seats[][COLS], char bookedSeats[][COLS]) {
             } else if(choice==1)
             {
             	printf("%2c ", '0');
-			}
-			else {
+			}else {
                 printf("%2c ", seats[i][j]);
             }
         }
-
         if (i == 0 || i == 1) {
             printf(" --Rectilinear\n");
         } else if (i == 2 || i == 3 || i == 4 || i == 5) {
@@ -191,9 +284,7 @@ void displaySeatingArrangement(char seats[][COLS], char bookedSeats[][COLS]) {
                 printf("\n\n");
                 main();
             }
-        }
-    }
-}
+        } } }
 
 void bookSeat(char seats[][COLS], char bookedSeats[][COLS], int row, int col) {
     if (bookedSeats[row][col] == 'X') {
@@ -226,8 +317,8 @@ void amount() {
     int opi;
     if (seat_type == 1) 
 	{
-        printf("\nTotal amount to be paid : %d ", num * 450);
-        printf("\nEnter 1 to confirm booking and make payment otherwise Enter 0 to exit:");
+        printf("\nTOTAL AMOUNT TO PAID: %d ", num * rectilinearPrice);
+        printf("\nENTER 1 TO CONFIRM BOOKING \nAND MAKE PAYMENT OTHERWISE\n ENTER 0 TO EXIT:");
         scanf("%d", &choice);
 		 if (choice == 1) 
 		 {
@@ -246,14 +337,11 @@ void amount() {
 			else 
 			{
                 displaymenu();
-            }
-         }
-        
-    } else if (seat_type == 2) {
-        printf("\nTotal amount to be paid: %d ", num * 400);
-        printf("\nEnter 1 to confirm booking and make payment otherwise Enter 0 to exit:");
+            }}
+        } else if (seat_type == 2) {
+        printf("\nTOTAL AMOUNT TO PAID: %d ", num * superDeluxePrice);
+        printf("\nENTER 1 TO CONFIRM BOOKING \nAND MAKE PAYMENT OTHERWISE\n ENTER 0 TO EXIT:");
         scanf("%d", &choice);
-
         if (choice == 1) {
             user_details();
         } else 
@@ -269,8 +357,8 @@ void amount() {
             }
         }
     } else {
-        printf("\nTotal amount to be paid: %d ", num * 350);
-        printf("\nEnter 1 to confirm booking and make payment otherwise Enter 0 to exit:");
+        printf("\nTOTAL AMOUNT TO PAID: %d ", num * deluxePrice);
+        printf("\nENTER 1 TO CONFIRM BOOKING \nAND MAKE PAYMENT OTHERWISE\n ENTER 0 TO EXIT:");
         scanf("%d", &choice);
 
         if (choice == 1) {
@@ -315,40 +403,38 @@ void cancel(char seats[][COLS], char bookedSeats[][COLS], int row, int col) {
 
 
 void user_details() {
-    int i;
-    printf("\n\tEnter details of viewer :\n",i+1);
-    printf("\n\tName: ");
-    scanf("%s", U[0].name);
-    printf("\n\tPhone number: ");
-    scanf("%s", U[0].phno);
-    printf("\n\tAge: ");
-    scanf("%d", &U[0].age);
-    
-    
-    printf("\n\n\n\t\t--------------------------------------------------------------------\n");
-    printf("\n\t\t--------------------------MOVIE TICKET------------------------------\n");
-    printf("\n\t\t\tTicket\n");
-    printf("\n\t\t\tName: %s\n", U[0].name);
-    printf("\n\t\t\tPhone number: %s\n", U[0].phno);
-    printf("\n\t\t\tAge: %d\n", U[0].age);
-    printf("\n\t\t\tMovie: %s\n", show.showname);
-    printf("\n\t\t\tDate: %s\n", show.date);
-    printf("\n\t\t\tTime: %s\n", show.time);
-    printf("\n\t\t\tSeat type: %d\n", seat_type);
-    printf("\n\t\t\tNumber of seats booked: %d\n", num);
-    printf("\n\t\t\tTotal amount paid: ");
-
-    if (seat_type == 1) {
-        printf("%d\n", num * 450);
-    } else if (seat_type == 2) {
-        printf("%d\n", num * 400);
-    } else {
-        printf("%d\n", num * 350);
-    }
-    printf("\n\tPayment option: ");
-    printf("UPI\n");
-    printf("\n--------------------------------------------------------------------\n");
-    printf("\n\tTicket booked successfully! Enjoy the movie.\n");
-    printf("\n--------------------------------------------------------------------\n\n");
-    displaymenu();
+    int i=0;
+         printf("\n\tEnter details of viewer :\n",i+1);
+           printf("\n\tName: ");
+           scanf("%s", U[i].name);
+           printf("\n\tPhone number: ");
+           scanf("%s", U[i].phno);
+           printf("\n\tAge: ");
+           scanf("%d", &U[i].age);
+           printf("\n\n\n\t\t--------------------------------------------------------------------\n");
+           printf("\n\t\t--------------------------MOVIE TICKET------------------------------\n");
+           printf("\n\t\t\tTicket\n");
+           printf("\n\t\t\tName: %s\n", U[i].name);
+           printf("\n\t\t\tPhone number: %s\n", U[i].phno);
+           printf("\n\t\t\tAge: %d\n", U[i].age);
+           printf("\n\t\t\tMovie: %s\n", show.showname);
+           printf("\n\t\t\tDate: %s\n", show.date);
+           printf("\n\t\t\tTime: %s\n", show.time);
+           printf("\n\t\t\tSeat type: %d\n", seat_type);
+           printf("\n\t\t\tNumber of seats booked: %d\n", num);
+           printf("\n\t\t\tTotal amount paid: ");
+       if (seat_type == 1) {
+           printf("%d\n", num * rectilinearPrice);
+        } else if (seat_type == 2) {
+            printf("%d\n", num * superDeluxePrice);
+        } else {
+            printf("%d\n", num * deluxePrice);
+        }
+       printf("\n\tPayment option: ");
+        printf("UPI\n");
+        printf("\n--------------------------------------------------------------------\n");
+        printf("\n\tTicket booked successfully! Enjoy the movie.\n");
+        printf("\n--------------------------------------------------------------------\n\n");
+        displaymenu();
 }
+
